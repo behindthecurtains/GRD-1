@@ -257,7 +257,7 @@ function superGlitchSequence(){
 /* ---------- Dr. Pascoe TTS ---------- */
 function drPascoeMessage(){
   if(!window.speechSynthesis) return endMessage();
-  const msg = new SpeechSynthesisUtterance("Warning viewers: do not purchase the new Blu-ray. It contains spoilers and unwanted content.");
+  const msg = new SpeechSynthesisUtterance("This is Dr Lin Pascoe. If you are hearing this message, containment has failed. Do not distribute or replay this material. Do not invite it back.");
   msg.voice=null; msg.pitch=0.9; msg.rate=1; msg.volume=1.0;
   msg.onend = endMessage;
   speechSynthesis.speak(msg);
@@ -278,4 +278,5 @@ startBtn.addEventListener('click',()=>{
 </script>
 
 </body>
+
 </html>
