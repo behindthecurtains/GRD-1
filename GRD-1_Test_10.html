@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GRD-1 Archive — Final (CRT Hum)</title>
+<style>
+:root{--bg-blue:#001c73;--red:#c41616;--mono: "Courier New", monospace}
+html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--mono);-webkit-font-smoothing:antialiased;overflow:hidden}
+.center{height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column}
+
+/* Dynamic START button */
+#startBtn{
+  background:linear-gradient(180deg,#000,#111);
+  border:4px solid #b10f0f;
+  color:#fff;
+  padding:18px 44px;
+  font-weight:900;
+  letter-spacing:2px;
+  cursor:pointer;
+  font-size:22px;
+  text-transform:uppercase;
+  box-shadow:0 12px 36px rgba(0,0,0,0.8), 0 0 18px rgba(177,15,15,0.08) inset;
+  transform:translateZ(0);
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+#startBtn:active{ transform:translateY(2px) scale(.995); box-shadow:0 6px 20px rgba(0,0,0,0.85); }
+#startBtn:hover{ box-shadow:0 14px 40px rgba(0,0,0,0.9), 0 0 24px rgba(177,15,15,0.12) inset; }
+
+/* Boot area */
+#bootArea{display:none;padding:22px;max-width:980px;margin:18px auto;color:#e6eef8;white-space:pre-wrap;font-size:15px;line-height:1.45}
+.bootBox{background:#000;border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:6px}
+
+/* GRD area */
+#grdArea{display:none;margin:18px auto;width:92%;max-width:1100px;height:76vh;background:var(--bg-blue);position:relative;padding:12px;box-sizing:border-box}
+.banner{background:var(--red);color:#fff;padding:10px 14px;font-weight:800;border-radius:4px}
+.console{margin-top:14px;background:transparent;padding:12px;height:38%;overflow:auto;font-family:var(--mono);font-size:15px;white-space:pre-wrap;border:1px dashed rgba(255,255,255,0.06)}
+.progressRow{display:flex;align-items:center;gap:12px;margin-top:12px}
+.progressLabel{color:#dfefff;font-size:13px}
+.progressBar{flex:1;height:12px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.12)}
+.progressFill{width:0%;height:100%;background:linear-gradient(90deg,#fff,#cfe7ff);transition:width linear}
+
+/* ascii flash overlay */
+#asciiFlash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#fff;font-family:monospace;z-index:40;opacity:0;transition:opacity .06s linear;background:rgba(0,0,0,0.0);padding:18px;text-align:left}
+
+/* yes/no buttons (white boxes with blue text) */
+.ynBtn{
+  background:#fff;color:#0033aa;border:2px solid rgba(0,0,0,0.12);padding:8px 14px;font-family:var(--mono);font-weight:700;cursor:pointer;
+  margin-right:8px;border-radius:3px;
+}
+#ynWrap{margin-top:12px;display:flex;gap:10px;justify-content:flex-start}
+
+/* login area (positioned directly beneath the confirmation text) */
+#loginArea{display:none;margin-top:12px;background:rgba(255,255,255,0.04);padding:12px;border-radius:6px;max-width:640px}
+input.user{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 10px;font-family:var(--mono);font-size:14px;text-align:center}
+button.small{padding:8px 10px;margin-left:8px;background:#111;border:1px solid rgba(255,255,255,0.08);color:#fff;cursor:pointer}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.94);display:flex;align-items:center;justify-content:center;z-index:80;opacity:0;pointer-events:none;transition:opacity .28s}
+.overlay.visible{opacity:1;pointer-events:auto}
+.overlay img{max-width:86%;max-height:86%;border:6px solid #fff;box-shadow:0 18px 40px rgba(0,0,0,0.95)}
+.overlay button{position:absolute;right:18px;top:18px;background:var(--red);color:#fff;border:none;padding:8px 10px;cursor:pointer;font-weight:700}
+
+/* glitch */
+.glitching .banner{animation:shake .08s infinite}
+@keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
+
+/* final message */
+#finalMsg{position:fixed;inset:0;background:#000;color:#fff;display:none;align-items:center;justify-content:center;z-index:200;text-align:center;padding:48px;font-size:22px}
+</style>
+</head>
+<body>
+
+<!-- START -->
+<div class="center" id="startScreen">
+  <button id="startBtn">START</button>
+</div>
+
+<!-- LAWMAN boot -->
+<div id="bootArea" aria-live="polite"><div class="bootBox"><pre id="bootText"></pre></div></div>
+
+<!-- GRD -->
+<div id="grdArea" aria-live="polite">
+  <div class="banner">WARNING &gt;&gt; GRD-1 ACCESS</div>
+  <div class="console" id="console">
+    THE FOLLOWING RESEARCH FOOTAGE CONTAINS MATERIAL WHICH SOME VIEWERS MAY FIND DISTURBING.
+
+    ARE YOU SURE YOU WISH TO CONTINUE?
+  </div>
+
+  <div id="ynWrap" aria-hidden="false"></div>
+
+  <div class="progressRow" aria-hidden="true">
+    <div class="progressLabel">UNPACKING: OCTOBER_CHILDREN / FOXHILL</div>
+    <div class="progressBar"><div id="progressFill" class="progressFill"></div></div>
+  </div>
+
+  <!-- login area directly beneath the confirmation and yes/no -->
+  <div id="loginArea" aria-hidden="true">
+    <div style="margin-bottom:8px;color:#dfefff">GRD-1 LOGIN</div>
+    <input class="user" id="userInput" placeholder="ENTER USERNAME" autocomplete="off" />
+    <button class="small" id="userEnter">ENTER</button>
+  </div>
+
+  <div id="asciiFlash" role="status" aria-hidden="true"></div>
+</div>
+
+<!-- overlays -->
+<div class="overlay" id="overlay1"><button id="ret1">RETURN TO LOGIN SCREEN</button><img id="img1" alt="Unlocked 1"></div>
+<div class="overlay" id="overlay2"><button id="ret2">RETURN TO LOGIN SCREEN</button><img id="img2" alt="Unlocked 2"></div>
+<div class="overlay" id="overlay3"><button id="ret3">RETURN TO LOGIN SCREEN</button><img id="img3" alt="Unlocked 3"></div>
+
+<!-- final -->
+<div id="finalMsg" role="alert"><div><div style="font-weight:700;font-size:28px;margin-bottom:12px">HAPPY HALLOWE'EN, GHOSTWATCHERS.</div><div style="font-size:20px">Try not to have sleepless nights...</div></div></div>
+
+<script>
+/* ---------- state ---------- */
+const SECRET = ['PASCOE','DEMESCU','OCC'];
+let unlocked = [];
+let finalTriggered = false;
+let faceFlashes = 0;
+
+/* ---------- elements ---------- */
+const startScreen = document.getElementById('startScreen');
+const startBtn = document.getElementById('startBtn');
+const bootArea = document.getElementById('bootArea');
+const bootText = document.getElementById('bootText');
+const grdArea = document.getElementById('grdArea');
+const consoleEl = document.getElementById('console');
+const ynWrap = document.getElementById('ynWrap');
+const progressFill = document.getElementById('progressFill');
+const loginArea = document.getElementById('loginArea');
+const userInput = document.getElementById('userInput');
+const userEnter = document.getElementById('userEnter');
+const asciiFlash = document.getElementById('asciiFlash');
+const overlay1 = document.getElementById('overlay1');
+const overlay2 = document.getElementById('overlay2');
+const overlay3 = document.getElementById('overlay3');
+const ret1 = document.getElementById('ret1');
+const ret2 = document.getElementById('ret2');
+const ret3 = document.getElementById('ret3');
+const img1 = document.getElementById('img1');
+const img2 = document.getElementById('img2');
+const img3 = document.getElementById('img3');
+const finalMsg = document.getElementById('finalMsg');
+
+/* ---------- START button fix (v6) ---------- */
+startBtn.addEventListener('click', ()=>{
+  initAudio();
+  startScreen.style.display = 'none';
+  bootArea.style.display = 'block';
+  runLawmanBoot();
+});
+
+/* ---------- rest of v6 code remains exactly the same ---------- */
+/* (boot, GRD phase, unpacking, glitch, ascii flashes, TTS, login, overlays, final sequence) */
+/* ... include all your original v6 JS here unchanged ... */
+
+</script>
+</body>
+</html>
