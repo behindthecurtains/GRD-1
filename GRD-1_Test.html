@@ -2,123 +2,204 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<title>GRD-1 Archive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GRD-1 Archive — Working</title>
 <style>
-body{margin:0;font-family:"Courier New",monospace;background:#000;color:#fff;overflow:hidden;}
-#startScreen,#bootArea,#grdArea,#overlayImg,#finalMsg{position:relative;width:100%;height:100%;display:none;}
-#startScreen{display:flex;justify-content:center;align-items:center;flex-direction:column;height:600px;}
-button{cursor:pointer;}
-#bootArea,#grdArea,#overlayImg,#finalMsg{padding:12px;box-sizing:border-box;}
-.banner{background:#c41616;padding:6px 10px;font-weight:800;border-radius:4px;}
-.console{background:transparent;padding:6px;height:180px;overflow:auto;white-space:pre-wrap;border:1px dashed rgba(255,255,255,0.06);}
-.ynBtn{background:#fff;color:#0033aa;border:2px solid rgba(0,0,0,0.12);padding:6px 10px;font-weight:700;margin-right:6px;}
-#loginArea input{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:6px 8px;}
-#overlayImg{position:absolute;inset:0;background:#000;text-align:center;z-index:1000;}
-#overlayImg img{max-width:90%;max-height:80%;margin-top:50px;}
-#overlayImg button{position:absolute;top:6px;right:6px;padding:6px 10px;background:#c41616;color:#fff;border:none;font-weight:700;}
-#finalMsg{display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:18px;}
+:root{--bg-blue:#001c73;--red:#c41616;--mono:"Courier New",monospace}
+html,body{height:100%;margin:0;background:#000;color:#fff;font-family:var(--mono);-webkit-font-smoothing:antialiased;overflow:hidden}
+.center{height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#startBtn{background:linear-gradient(180deg,#000,#111);border:4px solid #b10f0f;color:#fff;padding:18px 44px;font-weight:900;letter-spacing:2px;cursor:pointer;font-size:22px;text-transform:uppercase;box-shadow:0 12px 36px rgba(0,0,0,0.8),0 0 18px rgba(177,15,15,0.08) inset;transition:transform .12s ease,box-shadow .12s ease;}
+#startBtn:active{transform:translateY(2px) scale(.995);box-shadow:0 6px 20px rgba(0,0,0,0.85);}
+#startBtn:hover{box-shadow:0 14px 40px rgba(0,0,0,0.9),0 0 24px rgba(177,15,15,0.12) inset;}
+#bootArea,#grdArea,#loginArea,#finalMsg{display:none;}
+#bootArea,.bootBox{padding:22px;max-width:980px;margin:18px auto;color:#e6eef8;white-space:pre-wrap;font-size:15px;line-height:1.45}
+.bootBox{background:#000;border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:6px}
+#grdArea{margin:18px auto;width:92%;max-width:1100px;height:76vh;background:var(--bg-blue);position:relative;padding:12px;box-sizing:border-box}
+.banner{background:var(--red);color:#fff;padding:10px 14px;font-weight:800;border-radius:4px}
+.console{margin-top:14px;background:transparent;padding:12px;height:38%;overflow:auto;font-family:var(--mono);font-size:15px;white-space:pre-wrap;border:1px dashed rgba(255,255,255,0.06)}
+.progressRow{display:flex;align-items:center;gap:12px;margin-top:12px}
+.progressLabel{color:#dfefff;font-size:13px}
+.progressBar{flex:1;height:12px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;border:1px solid rgba(255,255,255,0.12)}
+.progressFill{width:0%;height:100%;background:linear-gradient(90deg,#fff,#cfe7ff);transition:width linear}
+#asciiFlash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:#fff;font-family:monospace;z-index:40;opacity:0;transition:opacity .06s linear;background:rgba(0,0,0,0);padding:18px;text-align:left}
+.ynBtn{background:#fff;color:#0033aa;border:2px solid rgba(0,0,0,0.12);padding:8px 14px;font-family:var(--mono);font-weight:700;cursor:pointer;margin-right:8px;border-radius:3px}
+#ynWrap{margin-top:12px;display:none;gap:10px;justify-content:flex-start}
+#loginArea{margin-top:12px;background:rgba(255,255,255,0.04);padding:12px;border-radius:6px;max-width:640px}
+input.user{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:8px 10px;font-family:var(--mono);font-size:14px;text-align:center}
+button.small{padding:8px 10px;margin-left:8px;background:#111;border:1px solid rgba(255,255,255,0.08);color:#fff;cursor:pointer}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.94);display:flex;align-items:center;justify-content:center;z-index:80;opacity:0;pointer-events:none;transition:opacity .28s}
+.overlay.visible{opacity:1;pointer-events:auto}
+.overlay img{max-width:86%;max-height:86%;border:6px solid #fff;box-shadow:0 18px 40px rgba(0,0,0,0.95)}
+.overlay button{position:absolute;right:18px;top:18px;background:var(--red);color:#fff;border:none;padding:8px 10px;cursor:pointer;font-weight:700}
+.glitching .banner{animation:shake .08s infinite}
 @keyframes shake{0%,100%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}}
-.glitch{animation:shake 0.08s infinite;}
-#asciiFlash{position:absolute;inset:0;color:#fff;font-family:monospace;pointer-events:none;opacity:0;transition:opacity .06s linear;white-space:pre-wrap;padding:12px;}
+#finalMsg{position:fixed;inset:0;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;z-index:200;text-align:center;padding:48px;font-size:22px}
 </style>
 </head>
 <body>
 
-<!-- Start Screen -->
-<div id="startScreen">
-  <button id="startBtn" style="background:#111;color:#fff;padding:18px 44px;font-weight:900;font-size:22px;">START</button>
+<div class="center" id="startScreen">
+  <button id="startBtn">START</button>
 </div>
 
-<!-- Boot -->
-<div id="bootArea">
-  <pre id="bootText"></pre>
-</div>
+<div id="bootArea" aria-live="polite"><div class="bootBox"><pre id="bootText"></pre></div></div>
 
-<!-- GRD -->
-<div id="grdArea">
-  <div class="banner" id="grdBanner">WARNING &gt;&gt; GRD-1 ACCESS</div>
-  <div class="console" id="console">THE FOLLOWING RESEARCH FOOTAGE CONTAINS MATERIAL WHICH SOME VIEWERS MAY FIND DISTURBING.
+<div id="grdArea" aria-live="polite">
+  <div class="banner">WARNING &gt;&gt; GRD-1 ACCESS</div>
+  <div class="console" id="console">
+    THE FOLLOWING RESEARCH FOOTAGE CONTAINS MATERIAL WHICH SOME VIEWERS MAY FIND DISTURBING.
 
-ARE YOU SURE YOU WISH TO CONTINUE?</div>
-  <div id="ynWrap"></div>
-  <div id="loginArea">
-    <input id="userInput" placeholder="ENTER USERNAME"/>
-    <button id="userEnter">ENTER</button>
+    ARE YOU SURE YOU WISH TO CONTINUE?
   </div>
-  <div id="asciiFlash"></div>
+
+  <div id="ynWrap"></div>
+
+  <div class="progressRow" aria-hidden="true">
+    <div class="progressLabel">UNPACKING: OCTOBER_CHILDREN / FOXHILL</div>
+    <div class="progressBar"><div id="progressFill" class="progressFill"></div></div>
+  </div>
+
+  <div id="loginArea" aria-hidden="true">
+    <div style="margin-bottom:8px;color:#dfefff">GRD-1 LOGIN</div>
+    <input class="user" id="userInput" placeholder="ENTER USERNAME" autocomplete="off" />
+    <button class="small" id="userEnter">ENTER</button>
+  </div>
+
+  <div id="asciiFlash" role="status" aria-hidden="true"></div>
 </div>
 
-<!-- Overlay for secret images -->
-<div id="overlayImg">
-  <button id="returnBtn">RETURN TO LOGON</button>
-  <img id="secretImage" src="" alt="Secret"/>
-</div>
+<!-- overlays -->
+<div class="overlay" id="overlay1"><button id="ret1">RETURN TO LOGON</button><img id="img1" alt="Unlocked 1"></div>
+<div class="overlay" id="overlay2"><button id="ret2">RETURN TO LOGON</button><img id="img2" alt="Unlocked 2"></div>
+<div class="overlay" id="overlay3"><button id="ret3">RETURN TO LOGON</button><img id="img3" alt="Unlocked 3"></div>
 
-<!-- Final message -->
-<div id="finalMsg">
-  <div style="font-weight:700;font-size:24px;margin-bottom:8px;">Happy Hallowe'en, Ghostwatchers!</div>
-  <div>Try not to have sleepless nights...</div>
-</div>
+<div id="finalMsg" role="alert"><div><div style="font-weight:700;font-size:28px;margin-bottom:12px">HAPPY HALLOWE'EN, GHOSTWATCHERS.</div><div style="font-size:20px">Try not to have sleepless nights...</div></div></div>
 
 <script>
-const SECRET = ['PASCOE','DEMESCU','OCC'];
-let unlocked=[], finalTriggered=false;
-const startScreen=document.getElementById('startScreen');
-const startBtn=document.getElementById('startBtn');
-const bootArea=document.getElementById('bootArea');
-const bootText=document.getElementById('bootText');
-const grdArea=document.getElementById('grdArea');
-const consoleEl=document.getElementById('console');
-const ynWrap=document.getElementById('ynWrap');
-const loginArea=document.getElementById('loginArea');
-const userInput=document.getElementById('userInput');
-const userEnter=document.getElementById('userEnter');
-const overlayImg=document.getElementById('overlayImg');
-const secretImage=document.getElementById('secretImage');
-const returnBtn=document.getElementById('returnBtn');
-const finalMsg=document.getElementById('finalMsg');
-const grdBanner=document.getElementById('grdBanner');
-const asciiFlash=document.getElementById('asciiFlash');
+const SECRET=['PASCOE','DEMESCU','OCC']; 
+let unlocked=[], finalTriggered=false, faceFlashes=0;
 
-/* Audio setup */
+const startScreen=document.getElementById('startScreen'), startBtn=document.getElementById('startBtn');
+const bootArea=document.getElementById('bootArea'), bootText=document.getElementById('bootText');
+const grdArea=document.getElementById('grdArea'), consoleEl=document.getElementById('console');
+const ynWrap=document.getElementById('ynWrap'), progressFill=document.getElementById('progressFill');
+const loginArea=document.getElementById('loginArea'), userInput=document.getElementById('userInput'), userEnter=document.getElementById('userEnter');
+const asciiFlash=document.getElementById('asciiFlash');
+const overlay1=document.getElementById('overlay1'), overlay2=document.getElementById('overlay2'), overlay3=document.getElementById('overlay3');
+const ret1=document.getElementById('ret1'), ret2=document.getElementById('ret2'), ret3=document.getElementById('ret3');
+const img1=document.getElementById('img1'), img2=document.getElementById('img2'), img3=document.getElementById('img3');
+const finalMsg=document.getElementById('finalMsg');
+
+/* placeholder images - replace with your uploaded images in GitHub if desired */
+img1.src='https://via.placeholder.com/800x600/001c73/ffffff?text=PASCOE+ARCHIVE';
+img2.src='https://via.placeholder.com/800x600/002a50/ffffff?text=DEMESCU+ARCHIVE';
+img3.src='https://via.placeholder.com/800x600/003360/ffffff?text=OCC+ARCHIVE';
+
+/* WebAudio setup */
 let audioCtx=null, masterGain=null, humGain=null;
 function initAudio(){
   if(audioCtx) return;
-  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  masterGain = audioCtx.createGain(); masterGain.gain.value=0.9; masterGain.connect(audioCtx.destination);
-  humGain = audioCtx.createGain(); humGain.gain.value=0.00005; humGain.connect(masterGain);
-  const osc1 = audioCtx.createOscillator(); osc1.type='sine'; osc1.frequency.value=55; osc1.connect(humGain); osc1.start();
-  const osc2 = audioCtx.createOscillator(); osc2.type='sine'; osc2.frequency.value=57.5; osc2.connect(humGain); osc2.start();
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  masterGain=audioCtx.createGain(); masterGain.gain.value=0.9; masterGain.connect(audioCtx.destination);
+  humGain=audioCtx.createGain(); humGain.gain.value=0.001; humGain.connect(masterGain);
 }
-function humFadeIn(){ if(humGain) humGain.gain.linearRampToValueAtTime(0.018,audioCtx.currentTime+1.0); }
-function humFadeOut(){ if(humGain) humGain.gain.linearRampToValueAtTime(0.00005,audioCtx.currentTime+1.6); }
-function playStaticBurst(){ if(!audioCtx) return; const len=Math.floor(audioCtx.sampleRate*0.08); const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<len;i++)d[i]=(Math.random()2-1)(1-i/len); const src=audioCtx.createBufferSource(); src.buffer=buf; const hp=audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=800; src.connect(hp); hp.connect(masterGain); src.start(); src.stop(audioCtx.currentTime+0.08); }
+function humFadeIn(t=1){ if(!humGain) return; humGain.gain.linearRampToValueAtTime(0.018,audioCtx.currentTime+t);}
+function humFadeOut(t=1.6){ if(!humGain) return; humGain.gain.linearRampToValueAtTime(0.001,audioCtx.currentTime+t);}
+function playStaticBurst(){ if(!audioCtx) return; const len=Math.floor(audioCtx.sampleRate*0.08); const buf=audioCtx.createBuffer(1,len,audioCtx.sampleRate); const d=buf.getChannelData(0); for(let i=0;i<len;i++) d[i]=(Math.random()2-1)(1-i/len); const src=audioCtx.createBufferSource(); src.buffer=buf; const hp=audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=800; src.connect(hp); hp.connect(masterGain); src.start(); src.stop(audioCtx.currentTime+0.08);}
+function clickSound(freq,time=0.02){ if(!audioCtx) return; const o=audioCtx.createOscillator(),g=audioCtx.createGain(); o.type='square'; o.frequency.value=freq; g.gain.value=0.06; o.connect(g); g.connect(masterGain); o.start(); o.stop(audioCtx.currentTime+time);}
 
-/* Boot */
-const lawmanLines=['LAWMAN MOS SYSTEM READY','> INIT SEQ 1','> DETECT: 3.5" FLOPPY DRIVE A:','> LOADING: GHOSTWATCH.EXE','> READING FILE HEADERS...','> INITIALISING RESTRICTED ARCHIVE','> WARNING: ENCRYPTED FILES DETECTED','> DECRYPTING...','> MOUNTING MODULE: GRD-1','> EXECUTING /GRD-1/INIT...'];
-function runBoot(){ bootText.textContent=''; let i=0; function step(){ if(i<lawmanLines.length){ bootText.textContent+=lawmanLines[i]+'\n'; if(i===2||i===3) playStaticBurst(); i++; setTimeout(step,500);} else{ setTimeout(()=>{bootArea.style.display='none'; startGRDPhase();},500);} } step(); }
+/* ---------- START button ---------- */
+startBtn.addEventListener('click',()=>{ initAudio(); startScreen.style.display='none'; bootArea.style.display='block'; runLawmanBoot(); });
 
-/* GRD phase */
-function startGRDPhase(){ grdArea.style.display='block'; consoleEl.textContent='THE FOLLOWING RESEARCH FOOTAGE CONTAINS MATERIAL WHICH SOME VIEWERS MAY FIND DISTURBING.\n\nARE YOU SURE YOU WISH TO CONTINUE?'; showYesNo(); }
-function showYesNo(){ ynWrap.innerHTML=''; ynWrap.style.display='flex'; ['YES','NO'].forEach(txt=>{ const b=document.createElement('button'); b.textContent=txt; b.className='ynBtn'; b.onclick=()=>{ ynWrap.style.display='none'; loginArea.style.display='block'; userInput.focus(); }; ynWrap.appendChild(b); }); }
+/* ---------- LAW/MAN boot ---------- */
+const lawmanLines=[
+  'LAWMAN MOS SYSTEM READY',
+  '> INIT SEQ 1',
+  '> DETECT: 3.5" FLOPPY DRIVE A:',
+  '> LOADING: GHOSTWATCH.EXE',
+  '> READING FILE HEADERS...',
+  '> INITIALISING RESTRICTED ARCHIVE',
+  '> WARNING: ENCRYPTED FILES DETECTED',
+  '> DECRYPTING...',
+  '> MOUNTING MODULE: GRD-1',
+  '> EXECUTING /GRD-1/INIT...'
+];
+function runLawmanBoot(){
+  bootText.textContent='';
+  let i=0;
+  function step(){ if(i<lawmanLines.length){ bootText.textContent+=lawmanLines[i]+'\n'; if(i===2||i===3) clickSound(900); i++; setTimeout(step,600+(i%3===0?200:0)); } else { setTimeout(()=>{ bootArea.style.display='none'; startGRDPhase(); },700); } }
+  step();
+}
 
-/* Login */
-userEnter.addEventListener('click',tryUser); userInput.addEventListener('keydown',e=>{if(e.key==='Enter') tryUser();});
-function tryUser(){ const val=(userInput.value||'').trim().toUpperCase(); userInput.value=''; if(!val) return; if(SECRET.includes(val)){ if(!unlocked.includes(val)) unlocked.push(val); showSecretOverlay(val);} else{ consoleEl.textContent+='\nACCESS DENIED'; triggerGlitch(); playStaticBurst(); }}
-function showSecretOverlay(name){ loginArea.style.display='none'; overlayImg.style.display='block'; secretImage.src = name==='PASCOE' ? 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width=800 height=600><rect width=100% height=100% fill=%23001c73/><text x=50%25 y=50%25 fill=%23fff font-family=monospace font-size=28 text-anchor=middle>PASCOE ARCHIVE</text></svg>' : name==='DEMESCU' ? 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width=800 height=600><rect width=100% height=100% fill=%23002a50/><text x=50%25 y=50%25 fill=%23fff font-family=monospace font-size=28 text-anchor=middle>DEMESCU ARCHIVE</text></svg>' : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width=800 height=600><rect width=100% height=100% fill=%23003360/><text x=50%25 y=50%25 fill=%23fff font-family=monospace font-size=28 text-anchor=middle>OCC ARCHIVE</text></svg>'; }
-returnBtn.addEventListener('click',()=>{ overlayImg.style.display='none'; loginArea.style.display='block'; userInput.focus(); if(unlocked.length>=3 && !finalTriggered){ finalTriggered=true; startFinalSequence(); }});
+/* ---------- GRD-1 phase ---------- */
+const unpackFiles=['PASCOE_92.LOG','LIVE_FEED_CAM3.BIN','OCC_FIELD_REPORT.TXT','PIPES_VISUAL.DAT','FOXHILL_DRIVE_TELEMETRY.BIN','PRESS_CLIFFS/CEEFAX_SCRAPE.TXT'];
+function startGRDPhase(){
+  grdArea.style.display='block';
+  consoleEl.textContent='THE FOLLOWING RESEARCH FOOTAGE CONTAINS MATERIAL WHICH SOME VIEWERS MAY FIND DISTURBING.\n\nARE YOU SURE YOU WISH TO CONTINUE?';
+  progressFill && (progressFill.style.width='0%');
+  humFadeIn(1.0);
+  showYesNo();
+}
+function showYesNo(){
+  if(document.getElementById('yesBtn')) return;
+  ynWrap.style.display='flex';
+  const yes=document.createElement('button'); yes.id='yesBtn'; yes.className='ynBtn'; yes.textContent='YES';
+  const no=document.createElement('button'); no.id='noBtn'; no.className='ynBtn'; no.textContent='NO';
+  ynWrap.appendChild(yes); ynWrap.appendChild(no);
+  yes.addEventListener('click',()=>{ ynWrap.innerHTML=''; ynWrap.style.display='none'; runUnpackSequence(); });
+  no.addEventListener('click',()=>{ ynWrap.innerHTML=''; ynWrap.style.display='none'; triggerShortGlitch(); playStaticBurst(); setTimeout(()=>{ runUnpackSequence(); },800); });
+}
+function runUnpackSequence(){
+  consoleEl.textContent='DECRYPTING ARCHIVE...\n';
+  progressFill && (progressFill.style.width='0%');
+  let idx=0; const total=unpackFiles.length; const per=11000/total;
+  function nextFrag(){ if(idx<total){ consoleEl.textContent+='\n> UNPACKING: '+unpackFiles[idx]; if(Math.random()<0.42) playStaticBurst(); idx++; setTimeout(nextFrag,per+Math.random()*240); } else { consoleEl.textContent+='\nDECRYPT COMPLETE. LOGIN NODE ACTIVATING...'; progressFill&&(progressFill.style.width='100%'); setTimeout(()=>{ triggerShortGlitch(); setTimeout(()=>showLoginInsideGRD(),900); },700); } }
+  setTimeout(()=>progressFill&&(progressFill.style.width='100%'),120);
+  nextFrag();
+}
+function triggerShortGlitch(){ document.body.classList.add('glitching'); playStaticBurst(); setTimeout(()=>document.body.classList.remove('glitching'),420); }
+function showLoginInsideGRD(){ consoleEl.textContent='LOGIN NODE ACTIVE. ENTER CREDENTIALS:'; progressFill&&(progressFill.style.width='0%'); loginArea.style.display='block'; userInput.value=''; userInput.focus(); }
 
-/* Glitch */
-function triggerGlitch(){ grdBanner.classList.add('glitch'); playStaticBurst(); asciiFlashEffect(); setTimeout(()=>{ grdBanner.classList.remove('glitch'); },420);}
-function asciiFlashEffect(){ asciiFlash.style.opacity=1; const chars=['█','▓','▒','░',' ']; let text=''; for(let y=0;y<12;y++){ for(let x=0;x<56;x++) text+=chars[Math.floor(Math.random()*chars.length)]; text+='\n'; } text+='\n█ ERROR: UNKNOWN ENTITY DETECTED █'; asciiFlash.textContent=text; setTimeout(()=>{ asciiFlash.style.opacity=0; asciiFlash.textContent=''; },520);}
+/* ---------- LOGIN logic ---------- */
+userEnter.addEventListener('click',tryUser);
+userInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') tryUser(); });
+function tryUser(){
+  const raw=(userInput.value||'').trim().toUpperCase(); userInput.value=''; if(!raw) return;
+  if(SECRET.includes(raw)){
+    if(!unlocked.includes(raw)) unlocked.push(raw);
+    consoleEl.textContent+='\nACCESS GRANTED: '+raw+'\n--- FILE UNLOCKED ---';
+    if(raw==='PASCOE') showOverlay(1);
+    if(raw==='DEMESCU') showOverlay(2);
+    if(raw==='OCC') showOverlay(3);
+    document.body.classList.add('glitching'); setTimeout(()=>document.body.classList.remove('glitching'),300);
+  } else {
+    consoleEl.textContent+='\nACCESS DENIED'; playStaticBurst();
+    document.body.classList.add('glitching'); setTimeout(()=>document.body.classList.remove('glitching'),240);
+  }
+  try{ consoleEl.scrollTop=consoleEl.scrollHeight; }catch(e){}
+}
 
-/* Final */
-function startFinalSequence(){ loginArea.style.display='none'; grdArea.style.display='block'; let step=0; const t=setInterval(()=>{ triggerGlitch(); step++; if(step>10){ clearInterval(t); playFinalAudio(); }},200);}
-function playFinalAudio(){ initAudio(); humFadeIn(); if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance("Happy Hallowe'en, Ghostwatchers! Try not to have sleepless nights."); u.rate=0.95; u.pitch=0.9; u.onend=()=>{ humFadeOut(); grdArea.style.display='none'; finalMsg.style.display='flex'; }; speechSynthesis.speak(u);} else { humFadeOut(); grdArea.style.display='none'; finalMsg.style.display='flex'; }}
+/* ---------- overlays ---------- */
+function showOverlay(n){ loginArea.style.display='none'; const el=n===1?overlay1:n===2?overlay2:overlay3; el.classList.add('visible'); }
+ret1.addEventListener('click',()=>{ overlay1.classList.remove('visible'); onReturnFromOverlay(); });
+ret2.addEventListener('click',()=>{ overlay2.classList.remove('visible'); onReturnFromOverlay(); });
+ret3.addEventListener('click',()=>{ overlay3.classList.remove('visible'); onReturnFromOverlay(); });
+function onReturnFromOverlay(){ loginArea.style.display='block'; userInput.focus(); if(unlocked.length>=3 && !finalTriggered){ finalTriggered=true; setTimeout(()=>startFinalSequence(),3000); } }
 
-/* Start button */
-startBtn.addEventListener('click',()=>{ initAudio(); startScreen.style.display='none'; bootArea.style.display='block'; runBoot(); });
+/* ---------- final sequence ---------- */
+function startFinalSequence(){
+  loginArea.style.display='none';
+  grdArea.style.display='block';
+  document.body.classList.add('glitching');
+  let step=0; const t=setInterval(()=>{
+    playStaticBurst(); if(Math.random()>0.3) blinkAsciiFlash(); step++;
+    if(step>12){ clearInterval(t); document.body.classList.remove('glitching'); playFinalAudio(); }
+  },180);
+}
+function blinkAsciiFlash(){ asciiFlash.style.opacity=1; setTimeout(()=>{ asciiFlash.style.opacity=0; },120);}
+function playFinalAudio(){ if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance('This is Dr Lin Pascoe. If you are hearing this message, containment has failed.'); u.rate=0.92; u.pitch=0.86; u.volume=1.0; u.onend=showFinal; speechSynthesis.speak(u); } else { setTimeout(showFinal,2000); } }
+function showFinal(){ grdArea.style.display='none'; loginArea.style.display='none'; overlay1.classList.remove('visible'); overlay2.classList.remove('visible'); overlay3.classList.remove('visible'); finalMsg.style.display='flex'; }
+
 </script>
-
 </body>
 </html>
