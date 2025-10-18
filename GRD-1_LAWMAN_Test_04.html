@@ -6,28 +6,27 @@
 <title>LAWMAN MOS Boot</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-body {
+html, body {
   margin: 0;
-  background-color: black;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: black;
   color: #64cd88;
   font-family: 'Press Start 2P', monospace;
   font-size: 14px;
-  overflow: hidden;
-  position: relative;
-  height: 100vh;
 }
 #app {
-  width: 800px;
-  height: 600px;
-  transform-origin: top left;
-  position: absolute;
-  top: 0;
-  left: 0;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 #console {
-  width: 800px;
-  height: 600px;
+  width: 100%;
+  height: 100%;
   padding: 20px;
+  box-sizing: border-box;
   background-color: black;
   border: 2px solid #64cd88;
   white-space: pre-wrap;
@@ -50,18 +49,6 @@ button#startBtn {
   font-family: 'Press Start 2P', monospace;
   font-size: 16px;
   cursor: pointer;
-}
-.loading-wheel {
-  display: inline-block;
-  width: 1em;
-  animation: spin 0.3s linear infinite;
-}
-@keyframes spin {
-  0% { content: "/"; }
-  25% { content: "-"; }
-  50% { content: "\\"; }
-  75% { content: "|"; }
-  100% { content: "/"; }
 }
 </style>
 </head>
@@ -169,22 +156,6 @@ async function runSequence() {
 }
 
 startBtn.addEventListener('click', runSequence);
-
-// --- Auto-scaling ---
-function scaleContent() {
-  const app = document.getElementById('app');
-  const scaleX = window.innerWidth / 800;
-  const scaleY = window.innerHeight / 600;
-  const scale = Math.min(scaleX, scaleY);
-  app.style.transform = `scale(${scale})`;
-  const left = (window.innerWidth - 800 * scale) / 2;
-  const top = (window.innerHeight - 600 * scale) / 2;
-  app.style.left = `${left}px`;
-  app.style.top = `${top}px`;
-}
-
-window.addEventListener('resize', scaleContent);
-window.addEventListener('load', scaleContent);
 </script>
 
 </body>
