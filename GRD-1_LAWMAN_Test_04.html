@@ -13,12 +13,21 @@ body {
   font-family: 'Press Start 2P', monospace;
   font-size: 14px;
   overflow: hidden;
+  position: relative;
+  height: 100vh;
+}
+#app {
+  width: 800px;
+  height: 600px;
+  transform-origin: top left;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 #console {
   width: 800px;
   height: 600px;
   padding: 20px;
-  margin: 40px auto;
   background-color: black;
   border: 2px solid #64cd88;
   white-space: pre-wrap;
@@ -58,8 +67,10 @@ button#startBtn {
 </head>
 <body>
 
-<div id="console"></div>
-<button id="startBtn">START</button>
+<div id="app">
+  <div id="console"></div>
+  <button id="startBtn">START</button>
+</div>
 
 <audio id="modemSound" src="https://behindthecurtains.github.io/GRD-1/188828__0ktober__modem_dial.wav"></audio>
 
@@ -69,7 +80,6 @@ const startBtn = document.getElementById('startBtn');
 const modem = document.getElementById('modemSound');
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-// function to play a short beep using Web Audio API
 function beep(freq = 440, duration = 100, volume = 0.1) {
   const osc = audioCtx.createOscillator();
   const gainNode = audioCtx.createGain();
@@ -130,7 +140,6 @@ function typeLine(line, delay, bleepFreq) {
 }
 
 async function runSequence() {
-  // resume audio context (required for Chrome autoplay restrictions)
   await audioCtx.resume();
 
   startBtn.style.display = 'none';
@@ -155,9 +164,30 @@ async function runSequence() {
       consoleBox.innerHTML += "\n>>> HANDSHAKE COMPLETE\n";
     }
   }
+
+  // Notify parent iframe that this experience is complete
+  window.parent.postMessage('experience-complete', '*');
 }
 
 startBtn.addEventListener('click', runSequence);
+
+// --- Auto-scaling ---
+function scaleContent() {
+  const app = document.getElementById('app');
+  const scaleX = window.innerWidth / 800;
+  const scaleY = window.innerHeight / 600;
+  const scale = Math.min(scaleX, scaleY);
+  app.style.transform = `scale(${scale})`;
+
+  // Center the content
+  const left = (window.innerWidth - 800 * scale) / 2;
+  const top = (window.innerHeight - 600 * scale) / 2;
+  app.style.left = `${left}px`;
+  app.style.top = `${top}px`;
+}
+
+window.addEventListener('resize', scaleContent);
+window.addEventListener('load', scaleContent);
 </script>
 
 </body>
