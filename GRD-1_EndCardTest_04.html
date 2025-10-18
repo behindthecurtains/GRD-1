@@ -9,14 +9,18 @@ html, body {
   margin:0; padding:0; background:#000; color:#64cd88;
   font-family:'Press Start 2P', monospace;
   height:100vh; overflow:hidden;
-  display:flex; justify-content:flex-start; align-items:flex-start;
-  flex-direction:column;
+}
+#app {
+  width:800px;
+  height:600px;
+  position:absolute;
+  top:0; left:0;
+  transform-origin: top left;
 }
 #container {
   width: 800px;
   height: 600px;
   padding: 20px;
-  margin: 40px auto;
   overflow: hidden;
   position: relative;
   display: flex;
@@ -63,10 +67,12 @@ html, body {
 </style>
 </head>
 <body>
-<div id="container">
-  <button id="startButton">Start</button>
-  <div id="screen"></div>
-  <button id="rebootButton" onclick="">ATTEMPT REBOOT</button>
+<div id="app">
+  <div id="container">
+    <button id="startButton">Start</button>
+    <div id="screen"></div>
+    <button id="rebootButton">ATTEMPT REBOOT</button>
+  </div>
 </div>
 
 <script>
@@ -150,7 +156,11 @@ function typeEffect() {
         rebootButton.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1)`;
       }, 100);
       setTimeout(()=>clearInterval(jitterInterval), 2000);
+
+      // Notify parent iframe when the end card sequence is done
+      setTimeout(()=>window.parent.postMessage('experience-complete','*'), 2500);
     }, 3000);
+
     setInterval(() => {
       const glitch = glitches[Math.floor(Math.random()*glitches.length)];
       screen.textContent = message + "\n" + glitch;
@@ -168,6 +178,21 @@ startButton.addEventListener('click', () => {
   screen.scrollTop = screen.scrollHeight;
   setTimeout(typeEffect, 1000);
 });
+
+// --- Auto-scaling ---
+function scaleContent() {
+  const app = document.getElementById('app');
+  const scaleX = window.innerWidth / 800;
+  const scaleY = window.innerHeight / 600;
+  const scale = Math.min(scaleX, scaleY);
+  app.style.transform = `scale(${scale})`;
+  const left = (window.innerWidth - 800 * scale) / 2;
+  const top = (window.innerHeight - 600 * scale) / 2;
+  app.style.left = `${left}px`;
+  app.style.top = `${top}px`;
+}
+window.addEventListener('resize', scaleContent);
+window.addEventListener('load', scaleContent);
 </script>
 </body>
 </html>
