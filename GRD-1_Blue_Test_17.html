@@ -6,16 +6,30 @@
 <title>GRD-1 Archive</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
-body {
-  margin:0; background:#000; font-family:'Press Start 2P', monospace; color:#fff;
-  overflow:hidden; position:relative; height:100vh;
+html, body {
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#000;
+  font-family:'Press Start 2P', monospace;
+  color:#fff;
 }
 #app {
-  width:800px; height:600px; position:absolute; top:0; left:0; transform-origin: top left;
+  width:100%;
+  height:100%;
+  position:relative;
 }
 #grdArea {
-  width:800px; height:600px; padding:20px; background:#001c73; box-sizing:border-box;
-  border:2px solid #0044aa; overflow:hidden; position:relative;
+  width:100%;
+  height:100%;
+  padding:20px;
+  background:#001c73;
+  box-sizing:border-box;
+  border:2px solid #0044aa;
+  overflow:hidden;
+  position:relative;
 }
 .banner { background:#c41616; color:#fff; padding:12px 16px; font-weight:800; border-radius:4px; }
 .console { margin-top:16px; white-space:pre-wrap; overflow-y:auto; height:200px; border:1px dashed rgba(255,255,255,0.06); padding:12px; font-size:14px; text-align:left; }
@@ -63,6 +77,7 @@ ARE YOU SURE YOU WISH TO CONTINUE?
 </div>
 
 <script>
+// === Audio & console logic (unchanged) ===
 const unpackFiles=[
   'PASCOE_92.LOG','LIVE_FEED_CAM3.BIN','OCC_FIELD_REPORT.TXT','PIPES_VISUAL.DAT',
   'FOXHILL_DRIVE_TELEMETRY.BIN','CEEFAX_SCRAPE.TXT'
@@ -180,28 +195,13 @@ function triggerEntityError(){
     setTimeout(()=>appendConsole(l,'color:#ff5555; font-weight:700;'), i*800);
   });
 
-  // Send "experience-complete" message to parent iframe after entity sequence
+  // Notify parent iframe after entity sequence
   setTimeout(()=>window.parent.postMessage('experience-complete','*'), lines.length*800+500);
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded',()=>{ initAudio(); showYesNo(); });
-
-// --- Auto-scaling ---
-function scaleContent() {
-  const app = document.getElementById('app');
-  const scaleX = window.innerWidth / 800;
-  const scaleY = window.innerHeight / 600;
-  const scale = Math.min(scaleX, scaleY);
-  app.style.transform = `scale(${scale})`;
-
-  const left = (window.innerWidth - 800 * scale) / 2;
-  const top = (window.innerHeight - 600 * scale) / 2;
-  app.style.left = `${left}px`;
-  app.style.top = `${top}px`;
-}
-window.addEventListener('resize', scaleContent);
-window.addEventListener('load', scaleContent);
 </script>
+
 </body>
 </html>
