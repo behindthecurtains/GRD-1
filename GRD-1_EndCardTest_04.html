@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ghostwatch Halloween End Card</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+html, body {
+  margin:0; padding:0; background:#000; color:#64cd88;
+  font-family:'Press Start 2P', monospace;
+  height:100vh; overflow:hidden;
+  display:flex; justify-content:flex-start; align-items:flex-start;
+  flex-direction:column;
+}
+#container {
+  width: 800px;
+  height: 600px;
+  padding: 20px;
+  margin: 40px auto;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+#screen {
+  width:90%; max-width:100%;
+  line-height:1.3; white-space:pre-wrap;
+  font-size:18px;
+  text-shadow:0 0 2px #64cd88, 0 0 4px #64cd88;
+  animation:flicker 0.15s infinite;
+  margin:20px auto 0 auto;
+  flex-grow:1;
+  overflow-y:auto;
+  max-height:calc(100% - 80px);
+}
+@keyframes flicker {
+  0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;}
+  20%,22%,24%,55%{opacity:0.4;}
+}
+#startButton, #rebootButton {
+  font-family:'Press Start 2P',monospace; font-size:16px;
+  padding:10px 20px; background:#000; color:#64cd88;
+  border:2px solid #64cd88; cursor:pointer; text-transform:uppercase;
+  box-shadow:0 0 5px #64cd88;
+  transition: all 0.6s ease;
+}
+#startButton:hover, #rebootButton:hover {
+  background:#64cd88; color:#000; box-shadow:0 0 15px #64cd88;
+}
+#rebootButton {
+  display:none;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) scale(0.5);
+  opacity:0;
+}
+#startButton {
+  display:block;
+  margin:20px auto 0 auto;
+}
+</style>
+</head>
+<body>
+<div id="container">
+  <button id="startButton">Start</button>
+  <div id="screen"></div>
+  <button id="rebootButton" onclick="">ATTEMPT REBOOT</button>
+</div>
+
+<script>
+const screen = document.getElementById('screen');
+const startButton = document.getElementById('startButton');
+const rebootButton = document.getElementById('rebootButton');
+
+const message = "Happy Hallowe'en, Ghostwatchers!\nTry not to have sleepless nights...\n\nKeep your cheese 'n' pickle sandwiches close.\n";
+let index = 0;
+
+const glitches = [
+  "C:\\GRD-1\\STUDIO1>_",
+  "ERROR: FOXHILL SIGNAL LOST",
+  "SYSTEM HALTED: NORTHOLT FEEDBACK",
+  "WARNING: EARLY KIM CORRUPT",
+  "MEMORY MISSING: SUZANNE TUNSTALL",
+  "SEDDONS/PIPES STREAM INTERRUPTED",
+  "TRIPP MANNING VOLK BAUMGARTEN",
+  "BROKE GREENE SMITH CHARLES PARKINSON",
+  "BBC1 ARCHIVE: STUDIO1 MIRROR",
+  "AITON MILLER LACEY LOG MISSING",
+  "NATIONAL SÉANCE 2025 INITIATED",
+  "REBOOT INITIATED..."
+];
+
+// Web Audio API
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playOscGlitch() {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(300 + Math.random() * 900, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.05 + Math.random()*0.1, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.03 + Math.random()*0.05);
+}
+
+function playScratchGlitch() {
+  const bufferSize = audioCtx.sampleRate * 0.05;
+  const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    data[i] = (Math.random() * 2 - 1) * (Math.random() < 0.4 ? 1 : 0);
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = buffer;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(0.1 + Math.random()*0.1, audioCtx.currentTime);
+  noise.connect(gain).connect(audioCtx.destination);
+  noise.start();
+}
+
+function playGlitch() {
+  if (Math.random() < 0.6) playOscGlitch();
+  if (Math.random() < 0.5) playScratchGlitch();
+}
+
+function typeEffect() {
+  if (index < message.length) {
+    screen.textContent += message.charAt(index);
+    index++;
+    if (Math.random() < 0.15) playGlitch();
+    if (Math.random() < 0.2) {
+      const glitch = glitches[Math.floor(Math.random()*glitches.length)];
+      screen.textContent += "\n" + glitch + "\n";
+      playGlitch();
+    }
+    screen.scrollTop = screen.scrollHeight;
+    setTimeout(typeEffect, 80 + Math.random()*100);
+  } else {
+    setTimeout(() => {
+      rebootButton.style.display = 'block';
+      rebootButton.style.transition = 'all 1s ease';
+      rebootButton.style.opacity = 1;
+      rebootButton.style.transform = 'translate(-50%, -50%) scale(1)';
+      let jitterInterval = setInterval(() => {
+        const x = (Math.random()-0.5)*4;
+        const y = (Math.random()-0.5)*4;
+        rebootButton.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(1)`;
+      }, 100);
+      setTimeout(()=>clearInterval(jitterInterval), 2000);
+    }, 3000);
+    setInterval(() => {
+      const glitch = glitches[Math.floor(Math.random()*glitches.length)];
+      screen.textContent = message + "\n" + glitch;
+      playGlitch();
+      setTimeout(()=>screen.textContent=message,150);
+      screen.scrollTop = screen.scrollHeight;
+    }, 500 + Math.random()*500);
+  }
+}
+
+startButton.addEventListener('click', () => {
+  startButton.style.display = 'none';
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  screen.textContent = "C:\\ARCHIVE> SYSTEM FAILURE DETECTED...\n";
+  screen.scrollTop = screen.scrollHeight;
+  setTimeout(typeEffect, 1000);
+});
+</script>
+</body>
+</html>
