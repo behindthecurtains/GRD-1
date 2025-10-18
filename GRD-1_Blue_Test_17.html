@@ -180,7 +180,7 @@ function triggerEntityError(){
     setTimeout(()=>appendConsole(l,'color:#ff5555; font-weight:700;'), i*800);
   });
 
-  // Notify parent iframe when complete
+  // Send "experience-complete" message to parent iframe after entity sequence
   setTimeout(()=>window.parent.postMessage('experience-complete','*'), lines.length*800+500);
 }
 
