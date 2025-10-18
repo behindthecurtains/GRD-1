@@ -1,0 +1,130 @@
+<!-- Add this near the top of your body -->
+<audio id="modemSound" src="188828__0ktober__modem_dial.wav" preload="auto"></audio>
+
+<!-- Existing GRD-1 sounds (if any) stay as they are -->
+
+<script>
+let allUsernamesEntered = false;
+let correctUsernames = ["PASCOE", "DEMESCU", "OCC"];
+let enteredUsernames = [];
+
+function startSequence() {
+  // begin boot sequence
+  showBootScreen();
+  playModemSound();
+}
+
+function playModemSound() {
+  const audio = document.getElementById("modemSound");
+  if (audio) {
+    audio.currentTime = 0;
+    audio.play().catch(err => console.log("Audio playback blocked:", err));
+  }
+}
+
+function triggerSuperGlitch() {
+  const overlay = document.createElement("div");
+  overlay.id = "superGlitch";
+  overlay.style.position = "fixed";
+  overlay.style.inset = "0";
+  overlay.style.background = "black";
+  overlay.style.mixBlendMode = "difference";
+  overlay.style.zIndex = "9999";
+  overlay.style.pointerEvents = "none";
+  document.body.appendChild(overlay);
+
+  let frames = 0;
+  const interval = setInterval(() => {
+    frames++;
+    overlay.style.background = `hsl(${Math.random()*360},100%,${30+Math.random()*70}%)`;
+    overlay.style.filter = `contrast(${1+Math.random()*10}) blur(${Math.random()*8}px)`;
+    overlay.style.transform = `skew(${Math.random()*20-10}deg,${Math.random()*20-10}deg) scale(${1+Math.random()*0.4})`;
+    if (frames > 50) {
+      clearInterval(interval);
+      overlay.remove();
+      playPascoeWarning();
+    }
+  }, 80);
+}
+
+function playPascoeWarning() {
+  // brief pause before TTS
+  setTimeout(() => {
+    const pascoe = new SpeechSynthesisUtterance("Warning viewers. Do not purchase the new Blu Ray. This message has been compromised.");
+    pascoe.rate = 0.9;
+    pascoe.pitch = 0.8;
+    pascoe.volume = 1;
+    speechSynthesis.speak(pascoe);
+
+    // intense distortion during Pascoe’s message
+    let chaos = document.createElement("div");
+    chaos.id = "pascoeGlitch";
+    chaos.style.position = "fixed";
+    chaos.style.inset = "0";
+    chaos.style.background = "rgba(255,0,0,0.1)";
+    chaos.style.mixBlendMode = "difference";
+    chaos.style.zIndex = "9998";
+    document.body.appendChild(chaos);
+
+    let count = 0;
+    const pascoeInterval = setInterval(() => {
+      count++;
+      chaos.style.transform = `scale(${1 + Math.random() * 0.5}) rotate(${Math.random() * 5 - 2.5}deg)`;
+      chaos.style.background = `hsl(${Math.random()*360},100%,50%)`;
+      if (count > 80) {
+        clearInterval(pascoeInterval);
+        chaos.remove();
+        finalSpookyGlitch();
+      }
+    }, 70);
+  }, 1000);
+}
+
+function finalSpookyGlitch() {
+  const glitch = document.createElement("div");
+  glitch.style.position = "fixed";
+  glitch.style.inset = "0";
+  glitch.style.background = "white";
+  glitch.style.zIndex = "9999";
+  glitch.style.animation = "spookyFlash 1.2s ease-in-out";
+  document.body.appendChild(glitch);
+
+  glitch.addEventListener("animationend", () => {
+    glitch.remove();
+    showFinalMessage();
+  });
+}
+
+function showFinalMessage() {
+  const msg = document.createElement("div");
+  msg.innerText = "Happy Hallowe'en, Ghostwatchers! Try not to have sleepless nights...";
+  msg.style.position = "fixed";
+  msg.style.top = "50%";
+  msg.style.left = "50%";
+  msg.style.transform = "translate(-50%, -50%)";
+  msg.style.color = "#f00";
+  msg.style.fontFamily = "Courier New, monospace";
+  msg.style.fontSize = "1.4rem";
+  msg.style.textAlign = "center";
+  msg.style.background = "rgba(0,0,0,0.85)";
+  msg.style.padding = "20px";
+  msg.style.border = "2px solid red";
+  msg.style.zIndex = "10000";
+  document.body.appendChild(msg);
+}
+
+// Example hook: call triggerSuperGlitch() a few seconds after last return-to-logon
+function onThirdReturnToLogon() {
+  setTimeout(triggerSuperGlitch, 3000);
+}
+</script>
+
+<style>
+@keyframes spookyFlash {
+  0% { opacity: 0; filter: invert(0); }
+  25% { opacity: 1; filter: invert(1); }
+  50% { opacity: 0.7; filter: hue-rotate(90deg) blur(3px); }
+  75% { opacity: 1; filter: contrast(300%) saturate(200%) invert(1); }
+  100% { opacity: 0; filter: none; }
+}
+</style>
