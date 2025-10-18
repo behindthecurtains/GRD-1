@@ -141,7 +141,6 @@ function typeLine(line, delay, bleepFreq) {
 
 async function runSequence() {
   await audioCtx.resume();
-
   startBtn.style.display = 'none';
   consoleBox.textContent = "";
   
@@ -165,7 +164,7 @@ async function runSequence() {
     }
   }
 
-  // Notify parent iframe that this experience is complete
+  // --- Notify parent iframe that this experience is complete ---
   window.parent.postMessage('experience-complete', '*');
 }
 
@@ -178,8 +177,6 @@ function scaleContent() {
   const scaleY = window.innerHeight / 600;
   const scale = Math.min(scaleX, scaleY);
   app.style.transform = `scale(${scale})`;
-
-  // Center the content
   const left = (window.innerWidth - 800 * scale) / 2;
   const top = (window.innerHeight - 600 * scale) / 2;
   app.style.left = `${left}px`;
